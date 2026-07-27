@@ -53,6 +53,7 @@ import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { usePresenceClock } from "../../hooks/use-presence-clock";
 import { toast } from "sonner";
 import {
+  BACKGROUND_THUMBNAIL_WIDTH,
   includesTextForMatch,
   normalizeTextForMatch,
   type Chat,
@@ -934,7 +935,9 @@ export function ChatSidebar() {
     // Deliberately no fallback to defaultRoleplayBackground (which ChatArea's restore effect
     // applies): that would paint one identical banner across every roleplay chat.
     const bannerUrl =
-      chatListBackgrounds === "off" ? null : chatBackgroundMetadataToUrl(chat.metadata?.background, 320);
+      chatListBackgrounds === "off"
+        ? null
+        : chatBackgroundMetadataToUrl(chat.metadata?.background, BACKGROUND_THUMBNAIL_WIDTH);
 
     return (
       <div
