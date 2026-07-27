@@ -70,7 +70,14 @@ async function resolveThumbPath(filePath: string, filename: string, width: numbe
     const sharp = await getSharp();
     const buffer = await sharp(filePath).resize({ width, withoutEnlargement: true }).webp({ quality: 72 }).toBuffer();
     if (!existsSync(THUMB_DIR)) mkdirSync(THUMB_DIR, { recursive: true });
-    await writeFile(thumbPath, buffer);
+    // Concurrent requests race on the same deterministic path; write elsewhere and rename in.
+    const temporaryPath = `${thumbPath}.${process.pid}.${randomUUID()}.tmp`;
+    try {
+      await writeFile(temporaryPath, buffer);
+      renameSync(temporaryPath, thumbPath);
+    } finally {
+      if (existsSync(temporaryPath)) unlinkSync(temporaryPath);
+    }
     return thumbPath;
   } catch (error) {
     logger.warn(error instanceof Error ? error : new Error(String(error)), "Background thumbnail failed for %s", filename);
